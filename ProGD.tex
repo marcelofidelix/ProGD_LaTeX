@@ -1,0 +1,458 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+%\usepackage{pythonhighlight}
+\usepackage[margin=0.7in]{geometry}
+\usepackage[document]{ragged2e}
+\usepackage[portuguese]{babel}
+\usepackage{float}
+%\usepackage{minted,xcolor}
+%\usemintedstyle{manni}
+%\definecolor{bg}{HTML}{f7fcee}
+
+
+
+\begin{document}
+
+\title{Memorial de Cálculo do ProGD}
+\author{Marcelo Fidelix}
+
+\maketitle
+
+\section{Cálculo dos Parâmetros Geométricos}
+\justify
+Nesta seção serão demonstrados os cálculos dos parâmetros geométricos utilizados no programa. Todas as variáveis que representam vetores (conjunto de valores do mesmo tipo) no programa serão sublinhadas.
+
+As referências à norma API 2C correspondem à 7ª edição.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.66\columnwidth]{1.png}
+\end{figure}
+
+\subsection{Raios de Ação}
+\subsubsection{Raio do Gancho Principal}
+\begin{equation}
+\underline{r} = J + L cos(\underline{\theta}) + S sin(\underline{\theta})
+\end{equation}
+\subsubsection{Raio do CG da Lança}
+\begin{equation}
+\underline{r_M} = J + M cos(\underline{\theta})
+\end{equation}
+\subsubsection{Raio do Gancho Auxiliar}
+\begin{equation}
+\underline{r_{jib}} = \underline{r} + L_{jib} cos(\underline{\theta}) + S_{jib} sin(\underline{\theta})
+\end{equation}
+
+\subsection{Ângulo $\alpha$}
+
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.4\columnwidth]{2.png}
+\end{figure}
+
+\begin{equation}
+D_g = \sqrt{H^2 + \left( V + \frac{G}{2} \right)^2}
+\end{equation}
+
+\begin{equation}
+\theta_g = arctan \left( \frac{V + \frac{G}{2}}{H} \right)
+\end{equation}
+
+
+\begin{equation}
+\underline{L_{cg}} = \sqrt{D_g^2 + L^2 - 2D_g L cos(\pi -\underline{\theta} - \theta_g)}
+\end{equation}
+
+\begin{equation}
+\frac{D_g}{sen(\underline{\alpha})} = \frac{\underline{L_{cg}}}{sen(\pi -\underline{\theta} -\theta_g)} \rightarrow \underline{\alpha} = arcsen \left( \frac{D_g sen(\pi -\underline{\theta} -\theta_g)}{\underline{L_{cg}}} \right)
+\end{equation}
+
+\subsection{Ângulo $\beta$}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.5\columnwidth]{3.png}
+\end{figure}
+
+\begin{equation}
+D_l = \sqrt{a^2 + b^2}
+\end{equation}
+
+\begin{equation}
+\theta_l = arctan \left( \frac{b}{a} \right)
+\end{equation}
+
+\begin{equation}
+\underline{L_{cl}} = \sqrt{D_l^2 + (L - N)^2 - 2 D_l (L - N) cos(\pi - \underline{\theta} - \theta_l)}
+\end{equation}
+
+\begin{equation}
+\frac{D_l}{sen(\underline{\beta})} = \frac{\underline{L_{cl}}}{sen(\pi -\underline{\theta} - \theta_l)} \rightarrow \underline{\beta} = arcsen \left( \frac{D_l sen(\pi -\underline{\theta} - \theta_l)}{\underline{L_{cl}}} \right)
+\end{equation}
+
+\section{\textit{Fast Line Factor} e Eficiência}
+\justify
+Nesta seção será utiliza a metodologia apresentada na API RP 9B para calcular a majoração no esforço aplicado nos cabos de aço dos sistemas de carga e lança devido ao atrito nos mancais das roldanas. Para mancais de rolamento, será utilizado um fator K de 1,04, enquanto que para mancais de bucha, será utilizado um fator de 1,09.
+
+\subsection{Eficiência}
+
+\begin{equation}
+Ef_m = \frac{K^{N_{pm}} - 1}{K^{N_{rm}} N_{pm} (K - 1)}
+\end{equation}
+
+\begin{equation}
+Ef_l = \frac{K^{N_{pl}} - 1}{K^{N_{rl}} N_{pl} (K - 1)}
+\end{equation}
+
+\subsection{\textit{Fast Line Factor}}
+
+\begin{equation}
+FLF_m = \frac{1}{N_{pm}Ef_m}
+\end{equation}
+
+\begin{equation}
+FLF_l = \frac{1}{N_{pl}Ef_l}
+\end{equation}
+
+\section{Tração no Cabo do Sistema Principal}
+\justify
+Todos os esforços calculados pelo ProGD consideram que a carga no gancho é majorada pelo fator dinâmico onboard (Factored Load). Tal fator é calculado conforme equação prevista na API2C.
+
+\begin{equation}
+\underline{cv_{on}} = 1,373 - \frac{(\underline{P_c} + P_{moi}) \times 2,204623}{1173913} + A_v
+\end{equation}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{4.png}
+\end{figure}
+
+\begin{equation}
+\underline{FL} = (\underline{P_c} + P_{moi})cv_{on}
+\end{equation}
+
+\begin{equation}
+\underline{T_{cg}} = \underline{FL} FLF_m
+\end{equation}
+
+O parâmetro $A_v$ Deve ser calculado conforma a tabela 4 da API 2C.
+
+\section{Esforço de Sustentação da Lança e no Cabo de Lança}
+
+\begin{equation}
+P_l \underline{r_M} + \underline{FL} \underline{r} + P_{bola} \underline{r_{jib}} + \sum_{i = 1}^{n} D_i CC_icos(\underline{\theta}) = \underline{T_{cg}} L sen(\underline{\alpha}) \\ + \underline{E_{sl}} (L - N) sen(\underline{\beta})
+\end{equation}
+
+\begin{equation}
+\underline{E_{sl}} = \frac{P_l \underline{r_M} + \underline{FL} \underline{r} + P_{bola} \underline{r_{jib}} + \sum_{i = 1}^{n} D_i CC_icos(\underline{\theta}) - \underline{T_{cg}} L sen(\underline{\alpha})}{(L - N) sen(\underline{\beta})}
+\end{equation}
+
+\begin{equation}
+\underline{T_{cl}} = \underline{E_{sl}} FLF_l
+\end{equation}
+
+\section{Esforço de Compressão da Lança}
+\justify
+Para o cálculo do esforço de compressão da lança, o eixo da lança será considerado como o eixo x.
+
+\begin{equation}
+\underline{R_{px}} = \underline{E_{sl}} cos(\underline{\beta}) + \underline{T_{cg}} cos(\underline{\alpha}) - \left( \sum_{i = 1}^{n} CC_i + P_l + \underline{FL} \right) sen(\underline{\theta})
+\end{equation}
+
+\begin{equation}
+\underline{R_{py}} =  \left( \sum_{i = 1}^{n} CC_i + P_l + \underline{FL} \right) cos(\underline{\theta}) - \underline{E_{sl}} sen(\underline{\beta}) - \underline{T_{cg}} sen(\underline{\alpha})
+\end{equation}
+
+\begin{equation}
+\underline{R_p} = \sqrt{\underline{R_{px}}^2 + \underline{R_{py}}^2 }
+\end{equation}
+
+\justify
+Podemos também calcular o ângulo de desvio entre a reação no pino do pé da lança e o eixo da lança, que chamaremos de $\underline{\gamma}$.
+
+\begin{equation}
+\underline{\gamma} = arctan \left|\frac{\underline{R_{py}}}{\underline{R_{px}}}\right| - \underline{\theta}
+\end{equation}
+
+\begin{equation}
+\underline{E_{cl}} = \underline{R_p} cos(\underline{\gamma})
+\end{equation}
+
+\section{Momento Sobre o Pedestal}
+
+\justify
+O momento resultante aqui calculado considera o peso da lança, a carga no gancho (Factored Load), bem como o peso da plataforma giratória e do contrapeso, caso exista. Também são consideradas as cargas concentradas na lança.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.5\columnwidth]{5.png}
+\end{figure}
+
+\begin{equation}
+Mom =  \sum_{i = 1}^{n} \left[ \left(J + D_i cos\left(\underline{\theta}\right)\right) CC_i \right] + P_l \underline{r_M} + \underline{FL} \underline{r} + P_{bola} \underline{r_{jib}} - P_{plat} D_{plat} - P_{cp} D_{cp}
+\end{equation}
+
+\section{Esforços nas Hastes do Cavalete}
+\justify
+O modelo utilizado no ProGD considera um cavalete com hastes traseiras verticais e hastes dianteiras inclinadas. Todas as uniões são consideradas articuladas e o cálculo o programa calcula o valor do esforço trativo nas hastes traseiras e do esforço compressivo das hastes dianteiras.
+\justify
+A haste dianteira é considerada como sendo a união entre a sela fixa e o pino do pé da lança.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.5\columnwidth]{6.png}
+\end{figure}
+
+\begin{equation}
+(\frac{\pi}{2} - \theta_c + \underline{\alpha_{cl}}) + \underline{\beta} + (\pi - \theta_l - \underline{\theta}) = \pi 
+\end{equation}
+
+\begin{equation}
+\underline{\alpha_{cl}} = \underline{\theta} + \theta_l + \theta_c -\underline{\beta} - \frac{\pi}{2}
+\end{equation}
+
+\justify
+Uma vez que calculamos o ângulo $ \underline{\alpha_{cl}} $, e já conhecemos o valor do $ \underline{E_{sl}} $, podemos calcular os esforços nas hastes traseiras e dianteiras do cavalete. Além das forças exibidas na figura acima, existe uma reação das hastes dianteiras sobre as hastes traseiras. Tal reação deve equilibrar os esforços $\underline{E_{sl}}$ e $\underline{T_{cl}}$.
+
+\begin{equation}
+\underline{E_{sl}} cos(\underline{\alpha_{cl}}) = \underline{F_{hd}} sen(\theta_c)
+\end{equation}
+
+\begin{equation}
+\underline{F_{hd}} = \frac{\underline{E_{sl}} cos(\underline{\alpha_{cl}})}{sen(\theta_c)}
+\end{equation}
+
+O valor calculado acima representa o esforço de compressão aplicado sobre as hastes dianteiras do cavalete.
+
+\begin{equation}
+\underline{E_{sl}} sen(\underline{\alpha_{cl}}) + \underline{F_{hd}} cos(\theta_c) = \underline{T_{cl}} + \underline{F_{ht}}
+\end{equation}
+
+\begin{equation}
+\underline{F_{ht}} = \underline{E_{sl}} sen(\underline{\alpha_{cl}}) + \underline{F_{hd}} cos(\theta_c) - \underline{T_{cl}}
+\end{equation}
+
+\section{Momento de Inércia de Giro}
+O momento de inércia de giro do guindaste é calculado sem considerar resistência do rolamento de giro e nem o \textit{sidelead}. Serve apenas como um parâmetro para emissão de tabelas de carga reduzidas devido a problemas no sistema de giro.
+
+O cálculo mais preciso do momento necessário para girar o guindaste deve levar em conta também a aceleração ângular de giro máxima do ($\alpha_{giro}$)
+
+\begin{equation}
+M = I_{gd} \alpha_{giro}
+\end{equation}
+
+\begin{equation}
+I_{gd} = \sum_{i = 1}^{n} {m_i r_i^2}
+\end{equation}
+
+\begin{equation}
+I_{gd} = P_{cp} D_{cp}^2 + P_{plat} D_{plat}^2 +  \sum_{i = 1}^{n} \left[ CC_i (J + D_i cos(\underline{\theta}))^2\right] + P_l (J+r_M^2) + \underline{FL} \underline{r}^2 + P_{bola} r_{jib}^2
+\end{equation}
+
+\section{$C_v$ Offboard e Tabela Dinâmica}
+
+O cálculo do $C_v$ onboard pode ser feito conforme a equação abaixo.
+
+\begin{equation}
+\underline{C_v} = 1 + V_r \sqrt{\frac{\underline{K}}{g \times \underline{SWLH}}}
+\end{equation}
+
+Os parâmetros $V_r$ e $g$ devem ser calculados considerando as tabelas 3 e 5, além da equação 5 da API 2C. O Parâmetros $\underline{K}$ representa a rigidez vertical do guindaste em $lbf/ft$ e seu cálculo será discutido mais à frente.
+
+Uma vez calculados os valores do $\underline{C_v}$ para cada ângulo da tabela, devemos obter as razões $\frac{\underline{Cv_{on}}}{\underline{Cv_{off}}}$ e multiplicar os valores da tabela \textit{onboard} para obter a tabela \textit{offboard}.
+
+\section{Rigidez Vertical}
+
+A rigidez vertical ($\underline{K}$) está relacionada ao deslocamento da ponta da lança do guindaste quando a mesma é submetida a uma carga vertical. Quanto maior é esse deslocamento, mais fexível é o guindate e maior é a sua capacidade de absorver energia. Dessa forma, guindastes mais fexíveis tendem a ter menores perdas de capacidade na tabela \textit{offboard}.
+
+Vamos considerar um modelo onde haverá quatro molas representando o cabo do sistema de lança, os pendentes, a própria lança e o cabo do sistema de carga.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.66\columnwidth]{7.jpg}
+\end{figure}
+
+\subsection{Sistema de Sustentação da Lança}
+
+\subsubsection{Cabo de Lança}
+
+O trecho do cabo de lança entre o topo do cavalete e a sela flutuante, caso exista, pode ser calculada conforma indicado abaixo.
+
+\begin{equation}
+\underline{k_{clan}} = N_{pl} \frac{E_{clan}A_{clan}}{\underline{L_{clan}}}
+\end{equation}
+
+Os valores de módulo de elasticidade de um cabo de aço depende da sua construção e deve ser obtido no manual do fabricante. Tais valores podem ser inseridos na interface do programa.
+
+\subsubsection{Pendentes}
+
+Caso os pendentes existam, a sua rigidez pode ser calculada conforme indicado abaixo.
+
+\begin{equation}
+k_{pend} = N_{pend} \frac{E_{pend}A_{pend}}{L_{pend}}
+\end{equation}
+
+Após o cálculo da rigidez do cabo de lança e dos pendentes, podemos associar as duas rigidezes em série para obter a rigidez do sistema de sustentação da lança.
+
+\begin{equation}
+\underline{k_{sustlan}} = \frac{\underline{k_{clan}} \times k_{pend}}{\underline{k_{clan}} + k_{pend}}
+\end{equation}
+
+Caso o guindaste não possua pendentes, deve-se definir um valor baixo na entrada de dados, como $0,1m$ e um diâmetro exagerado para os pendentes, como $1m$. Assim, o valor da rigidez dos pendentes tem influência desprezível sobre o valor da rigidez do sistema de sustentação da lança.
+
+Uma vez que já temos o valor do esforço de sustentação da lança ($\underline{E_{sl}}$), podemos calcular o quanto o sistema de sustentação da lança irá alongar-se ($\underline{\Delta L_{sustlan}}$).
+
+\begin{equation}
+\underline{\Delta L_{sustlan}} = \frac{\underline{E_{sl}}}{\underline{K_{sustlan}}}
+\end{equation}
+
+\subsection{Lança}
+
+A lança está sujeita a um esforço de compressão, de forma que vamos calcular de forma simplificada a contração da mesma, considerando apenas as quatro cordas e um comprimento equivalente ao comprimento total da lança. Na prática, o cálculo da deformação da lança é mais complexo e seria necessário utilizar um modelo de elementos finitos com a modelagem da mesma em 3D. Também não computamos no cálculo a seguir a influência do momento devido ao peso próprio da lança.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\columnwidth]{8.jpg}
+\end{figure}
+
+\begin{equation}
+k_{lan} = 4 \frac{E_{aco} A_{lan}}{L}
+\end{equation}
+
+Uma vez que já temos o valor do esforço de compressão da lança calculado ($\underline{E_{cl}}$), podemos calcular o valor da contração da lança ($\underline{\Delta L_{lan}}$).
+
+\begin{equation}
+\underline{\Delta L_{lan}} = \frac{\underline{E_{cl}}}{k_{lan}}
+\end{equation}
+
+\subsection{Cabo de Carga}
+
+No caso do cabo do sistema principal de carga, vamos considerar o trecho do cabo entre a ponta da lança e o moitão, quando o mesmo encontra-se no nível do mar. Tal valor depende da altura do guindaste em relação ao nível do mar e pode ser ajustado na interface do programa.
+
+\begin{equation}
+\underline{k_{cm}} = \frac{E_{cmoi} A_{cmoi}}{\underline{L_{cmoi}}}
+\end{equation}
+
+O $\underline{L_{cmoi}}$ pode ser calculado, de forma muito aproximada:
+
+\begin{equation}
+\underline{L_{cmoi}} = H + \underline{L} sen(\underline{\theta})
+\end{equation}
+
+Onde o $H$ representa a altura do nível do mar até o pino de articulação do pé da lança. Seu valor deve ser definido na interface do programa.
+
+\begin{equation}
+\underline{k_{sistmoi}} = N_{pm} \underline{k_{cm}}
+\end{equation}
+
+Agora podemos calcular qual é o valor do alongamento.
+
+\begin{equation}
+\underline{\Delta H_{sistmoi}} = \frac{\underline{FL}}{\underline{k_{sistmoi}}}
+\end{equation}
+
+\subsection{Rigidez Global do Guindaste}
+
+Uma vez que calculamos os deslocamentos associados a cada uma das "molas" que compõem o guindaste, precisamos associá-los de forma a obter um deslocamento global e uma rigidez global.
+
+Vamos considerar que o alongamento do sistema de sustentação da lança associado à contração da lança e comparar os valores antes e depois de aplicação da carga na ponta da lança, de forma a obter o deslocamento global, somando-o em seguido ao deslocamento dos cabos do moitão.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\columnwidth]{9.jpg}
+\end{figure}
+
+Vamos inicialmente calcular o valor do ângulo $\underline{\epsilon}$ para cada ponto da tabela de capacidades do guindaste. Uma vez que já conhecemos os valores do alongamento do sistema de sustentação da lança, com como de contração da lança, será possível calcular o ângulo $\underline{\epsilon + \Delta \epsilon}$ e, consequentemente, o valor do deslocamento $\Delta H_1$.
+
+Primeiramente vamos considerar que apesas o sistema de sustentação da lança sofre deformação.
+
+\textbf{Sem Carga}
+
+\begin{equation}
+\underline{L_{cl}}^2 = D_l^2 + (L-N)^2 - 2 D_l(L-N) cos(\underline{\epsilon})
+\end{equation}
+
+O valor do ângulo $\underline{\epsilon}$ da equaçãpo acima já foi calculado.
+
+\begin{equation}
+\underline{\epsilon} = \pi - \theta_g - \underline{\theta}
+\end{equation}
+
+\textbf{Com Carga no Sistema de Sustentação da Lança}
+
+\begin{equation}
+\underline{L_{cl}} - \underline{d_{sustlan}}^2 = D_l^2 + (L-N)^2 - 2 D_l(L-N) cos(\underline{\epsilon} + \underline{\Delta \epsilon})
+\end{equation}
+
+\begin{equation}
+\underline{\Delta \epsilon} = acos \left [ \frac{(L_{cl} + d_{sustlan})^2 - D_l^2 - (L-N)^2}{-2 D_l (L-N)} \right] - \underline{\epsilon}
+\end{equation}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.3\columnwidth]{10.png}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.3\columnwidth]{11.png}
+\end{figure}
+
+\begin{equation}
+\underline{\Delta H_{SL}^{tip}} = L(\underline{\Delta \epsilon}) cos(\underline{\theta})
+\end{equation}
+
+\textbf{Com Carga de Compressão da Lança}
+
+\begin{equation}
+\underline{\Delta H_{lan}^{tip}} = \frac{\underline{E_{cl}}}{k_{lan}} sen(\underline{\theta})
+\end{equation}
+
+O deslocamento total vertical da ponta da lança pode ser calculado:
+
+\begin{equation}
+\underline{\Delta H_{total}^{tip}} = \underline{\Delta H_{sistmoi}} + \underline{\Delta H_{SL}^{tip}} + \underline{\Delta H_{lan}^{tip}}
+\end{equation}
+
+Logo, a rigidez vertical global do guindaste também pode ser calculada:
+
+\begin{equation}
+k_{gd} = \frac{\underline{SWLH}}{\underline{\Delta H_{total}^{tip}}}
+\end{equation}
+
+%\begin{center}
+%\begin{tabular}{ | l | l | p{13cm} |}
+%\hline
+%Variável & Unidade & Descrição \\ \hline
+%Pc & kgf & Vetor com as cargas da tabela de capacidades onboard do guindaste \\ \hline
+%teta & grau & Vetor com os ângulos ta tabela de capacidades onboard do guindaste \\ \hline
+%r & m & Vetor com as distâncias horizontais entre o centro de giro e o gancho do moitão \\ \hline
+%$r_M$ & m & Vetor com as distâncias horizontais entre o centro de giro e a projeção do CG da lança \\ \hline
+%$r_{jib}$ & m & Vetor com as distâncias horizontais entre o centro de giro e o gancho do sistema auxiliar \\ \hline
+%J & m & Distância horizontal entre o centro de giro e o pino da união articulada do pé da lança \\
+%\hline
+%H & m & Distância horizontal entre o centro do tambor do guincho do sistema principal de carga e o pino da união articulada do pé da lança\\
+%\hline
+%V & m & Distância vertical entre o pino do pé da lança e o centro do tambor de carga principal\\
+%\hline
+%G & m & Diâmetro do tambor de carga principal\\
+%\hline
+%L & m & Comprimento entre o pino do pé da lança e as roldanas do sistema principal de carga na ponta da lança medida ao longo do eixo da mesma\\
+%\hline
+%K & adm. & Fator utilizado no cálculo do Fast Line Factor (1,04 para rolamento e 1,09 para buchas)\\
+%\hline
+%Npm & adm. & Número de pernadas de cabo no sistema principal de carga\\
+%\hline
+%Npl & adm. & Número de pernadas de cabo no sistema de içamento da lança\\
+%\hline
+%Nrm & adm. & Número de roldanas do sistema principal de carga\\
+%\hline
+%Nrl & adm. & Número de roldanas do sistema de içamento da lança\\
+%\hline
+%
+%\end{tabular}
+%\end{center}
+
+\end{document}
